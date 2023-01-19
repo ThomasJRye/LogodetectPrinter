@@ -166,6 +166,7 @@ class Recognizer(object):
             font = cv2.FONT_HERSHEY_SIMPLEX
 
             for box, score, brand in zip(boxes, scores, brands):
+                print("brand: " + brand  + " score: " + str(score))
                 label = self.exemplars_set.index(brand)
                 color = tuple(np.array(self.cmap(label))[:3] * 255)
                 box = [int(b) for b in box]

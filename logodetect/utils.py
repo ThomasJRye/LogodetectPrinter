@@ -2,6 +2,7 @@
 
 # Standard library:
 import os
+from dotenv import load_dotenv
 
 # Pip packages:
 import numpy as np
@@ -10,6 +11,8 @@ from PIL import Image
 from torchvision.transforms import functional as F
 import torch
 from typing import Tuple
+import boto3
+
 
 
 def open_and_resize(path: str, image_resize: Tuple[int, int]) -> Image.Image:
@@ -70,3 +73,30 @@ def save_df(vectors, file_names, path, net_type="") -> None:
     brands = [clean_name(n) for n in file_names]
     logos_df = pd.DataFrame({"brand": brands, "img_vec": vectors_list})
     logos_df.to_pickle(path + "{}.pkl".format(net_type))
+
+def import_video():
+
+    # load environment variables from .env file
+    load_dotenv()
+
+    #access environment variables
+    # access_key = os.getenv('AWS_ACCESS_KEY_ID')
+    # secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+    # access specific s3 bucket
+    bucket_name = os.getenv('AWS_BUCKET')
+
+    # create an S3 client
+    s3 = boto3.client('s3')
+
+    # list all of the buckets in your account
+    response = s3.list_buckets()
+    #print(response)
+
+    # list all the files in specific bucket
+    response = s3.list_objects(Bucket=bucket_name)
+    print(response)
+    
+
+def helloWorld():
+    print("hello world!")
