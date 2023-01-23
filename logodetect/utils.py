@@ -2,7 +2,6 @@
 
 # Standard library:
 import os
-from dotenv import load_dotenv
 
 # Pip packages:
 import numpy as np
@@ -12,6 +11,8 @@ from torchvision.transforms import functional as F
 import torch
 from typing import Tuple
 import boto3
+from dotenv import load_dotenv
+
 
 
 
@@ -74,14 +75,21 @@ def save_df(vectors, file_names, path, net_type="") -> None:
     logos_df = pd.DataFrame({"brand": brands, "img_vec": vectors_list})
     logos_df.to_pickle(path + "{}.pkl".format(net_type))
 
+def import_from_s3():
+    # load environment variables from .env file
+    load_dotenv()
+
+    # access specific s3 bucket
+    bucket_name = os.getenv('AWS_BUCKET')
+
+    # create an S3 client
+    s3 = boto3.client
+
+
 def import_video():
 
     # load environment variables from .env file
     load_dotenv()
-
-    #access environment variables
-    # access_key = os.getenv('AWS_ACCESS_KEY_ID')
-    # secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 
     # access specific s3 bucket
     bucket_name = os.getenv('AWS_BUCKET')
@@ -93,10 +101,21 @@ def import_video():
     response = s3.list_buckets()
     #print(response)
 
+    file_name = '/visua/20210927_TV2_Sportsnyhetene_2125.mp4'
+    local_file_path = '/home/ubuntu/.hkt/logodetect/data/videos/'
+
+    #response = s3.get_object(Bucket=bucket_name, Key='7801207_2021_05_27_VIK_MIF_2nd_Half_416444.mp4')
+
+    #os.makedirs(os.path.dirname(local_file_path))
+
+    s3.download_file(bucket_name, '7801207_2021_05_27_VIK_MIF_2nd_Half_416444.mp4', local_file_path + '7801207_2021_05_27_VIK_MIF_2nd_Half_416444.mp4')
+
     # list all the files in specific bucket
-    response = s3.list_objects(Bucket=bucket_name)
+    #response = s3.list_objects(Bucket=bucket_name)
+
     print(response)
-    
+
+
 
 def helloWorld():
     print("hello world!")
