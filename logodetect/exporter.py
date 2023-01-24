@@ -8,7 +8,6 @@ from moviepy.editor import (
 )
 
 def exporter(recognitions, video_filename, end_time):
-    recog_formatter(recognitions)
     video = VideoFileClip(video_filename)
 
     fps = video.fps
@@ -17,13 +16,13 @@ def exporter(recognitions, video_filename, end_time):
 
     total_frames = int(duration * fps)
 
-    width = video.size[0]
-
-    height = video.size[1]
+    
 
     frame_duration = 1 / fps
     
-
+    width = video.size[0]
+    height = video.size[1]
+    videoArea = width * height
 
     data = {
         "dataRootName": "data", 
@@ -39,7 +38,7 @@ def exporter(recognitions, video_filename, end_time):
             "renderedediaUrl": "",
             "csvUrl": "",
 
-            "recognitions": recognitions
+            "detections": recog_formatter(recognitions, videoArea)
             }
 
     #print(data)
@@ -60,35 +59,63 @@ def exporter(recognitions, video_filename, end_time):
     # print(total_frames)
 
 # formats recognitions into a json file
-def recog_formatter(recognitions):
+def recog_formatter(recognitions, videoArea):
     output = {}
 
-    boxes = recognitions[0]['boxes'][0]
-
     for recognition in recognitions:
+        print(recognition)
+        print("stop")
         boxes = recognition["boxes"]
         scores = recognition["scores"]
         brands = recognition["brands"]
-
-        for box, score, brand in zip(boxes, scores, brands):
+        print(brands)
+        area = []
+        for box, in zip(boxes):
             #convert coordinates to int 
-            box = [int(b) for b in box]
-
             x1, y1, x2, y2 = box
 
             length = abs(x1 -x2)
             width = abs(y1 - y2)
-            area = length * width
-            print(area)
+            
+            area.append(length * width)
+
+        score=mean(scores)
+        areaPercentage = round(mean(area)/ videoArea, 2)
+
+        
+        
+        output.append(
+                {
+                    "id": 1,
+                    "type": "logo",
+                    "name": brand,
+                    "meta": {
+                        "logoVersionId": 1
+                        },
+                    "iconUrl": "",
+                    "size": size(areaPercentage),
+                    "area": videoArea,
+                    "areaPercentage": areaPercentage,
+                    "timeBeing": "0:00:00.000",
+                    "timeEnd": "0:00:00.000",
+                    "confidence": score,
+                    coordinates: {}
+                }
+            )
 
 
+            
+def size(areaPercentage):
+
+    if areaPercentage < 0.01:
+        return "tiny"
+    elif areaPercentage < 0.1:
+        return "small"
+    else:
+        return "large"
 
 
-
-    print(boxes)
-
-
-    print("recognitions")
-    print(recognitions)
+def mean(numbers):
+    return float(sum(numbers)) / max(len(numbers), 1)
 
         
