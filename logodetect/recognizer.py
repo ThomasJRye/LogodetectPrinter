@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import cv2
+import time
 from moviepy.editor import (
     VideoFileClip,
     VideoClip,
@@ -14,8 +15,10 @@ from moviepy.editor import (
     concatenate_videoclips,
 )
 
+
 from logodetect.utils import clean_name
 from logodetect.constants import get_recognizer_config, BRAND_LOGOS
+from logodetect.exporter import exporter
 
 
 class Recognizer(object):
@@ -73,6 +76,10 @@ class Recognizer(object):
         :param output_appendix: this string will be appended to the name of the processed video
         :return: None, processed video will be saved
         """
+
+        #start timer
+        start_time = time.time()
+
         self.set_video_source(video_filename)
 
         recognitions = []
@@ -83,8 +90,13 @@ class Recognizer(object):
             desc="Processing video",
         ):
             recognitions = self.compute_recognitions(frame, recognitions)
+        
         predicted_video = self.draw_video(recognitions)
         self.save_video(predicted_video, video_filename, output_appendix)
+
+        #end timer
+        end_time = time.time()
+        exporter(recognitions, video_filename, end_time)
 
     def predict_image(
         self, image_filename: str, output_appendix: str = "_output"
@@ -97,6 +109,7 @@ class Recognizer(object):
         """
         image = cv2.imread(image_filename)
         recognitions = self.compute_recognitions(image)
+        
         predicted_image = self.draw_overlay_boxes(image, recognitions[0])
         self.save_image(predicted_image, image_filename, output_appendix)
 
@@ -174,6 +187,7 @@ class Recognizer(object):
                 image = cv2.rectangle(image, top_left, bottom_right, color, 2)
                 text = "{}: {:.2f}".format(brand, score)
                 cv2.putText(image, text, top_left, font, 0.7, color, 2)
+        
 
         return image
 
@@ -212,6 +226,10 @@ class Recognizer(object):
             remove_temp=True,
             fps=self.video.fps,
         )
+
+
+
+
 
 
 def append_to_file_name(video_filename: str, output_appendix: str) -> str:

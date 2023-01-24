@@ -18,7 +18,7 @@ def connect():
     return s3, bucket
 
 
-def import_logos():
+def import_directory(prefix):
     # load environment variables from .env file
     load_dotenv()
 
@@ -31,7 +31,7 @@ def import_logos():
     # create an S3 client
     client = boto3.client('s3')
     # Use the list_objects method to get a list of all files in the directory
-    for obj in bucket.objects.filter(Prefix = 'logos'):
+    for obj in bucket.objects.filter(Prefix = prefix):
         print(obj)
         #s3.Object(bucket, obj.key).download_file(obj.key)
         try :
@@ -40,3 +40,4 @@ def import_logos():
         except Exception as e:
             print(e)
             continue
+

@@ -2,6 +2,7 @@
 
 # Standard library:
 import os
+import mysqlx
 
 # Pip packages:
 import numpy as np
@@ -117,5 +118,32 @@ def import_video():
 
 
 
-def helloWorld():
-    print("hello world!")
+def execute(query):
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
+    return result
+
+
+def connect():
+    load_dotenv()
+    
+    #load database configuration
+    config = {
+            'host': os.getenv('db_host'),
+            'user': os.getenv('db_user'),
+            'password': os.getenv('db_password'),
+            'database': os.getenv('db'),
+            'port':  os.getenv('db_port')
+        }
+    
+    try:
+        #create connection to database
+        connection = mysqlx.connector.connect(**config)
+
+        if connection.is_connected():
+
+            return connection
+    except Error as e:
+        print("Error while connecting to MySQL", e)
